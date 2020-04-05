@@ -1,3 +1,4 @@
+<%@page import="data.Position"%>
 <%@page import="java.util.List"%>
 <%@page import="data.Artikel"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -46,5 +47,16 @@
             </select>
             <button type="submit" for="artikelForm" id="cmd" name="cmd" value="hinzufuegen">Zum Warenkorb hinzufügen</button>
         </form>
+            
+        <h3>Warenkorb-Positionen</h3>
+        <%
+            List<Position> positionsListe = (List<Position>) application.getAttribute("positionsListe");
+            for(Position p : positionsListe) {
+        %>
+        <p><%=p.toString()%></p>
+        <button type="submit" for="artikelForm" id="cmd" name="cmd" value="entfernen#<%=p.getArtikelID()%>">Entfernen</button>
+        <%
+            }
+        %>
     </body>
 </html>

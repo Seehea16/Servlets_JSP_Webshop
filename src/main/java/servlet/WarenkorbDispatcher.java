@@ -1,6 +1,7 @@
 package servlet;
 
 import bl.WarenkorbModel;
+import data.Position;
 import java.io.IOException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -16,13 +17,14 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "WarenkorbDispatcher", urlPatterns = {"/WarenkorbDispatcher"})
 public class WarenkorbDispatcher extends HttpServlet {
 
-    private WarenkorbModel model = WarenkorbModel.getInstance();
+    private WarenkorbModel model;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         
-        config.getServletContext().setAttribute("artikelListe", model.fetchAllArtikel());
+        this.model = WarenkorbModel.getInstance();
+        config.getServletContext().setAttribute("artikelListe", model.getAllArtikel());
     }
     
     /**
@@ -65,7 +67,20 @@ public class WarenkorbDispatcher extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            String cmd = request.getParameter("cmd");
+            if(cmd.startsWith("entfernen#")) {
+                doEntfernen(request, response, cmd.substring(10));
+            } else if(cmd.equals("hinzufuegen")) {
+                doHinzufuegen(request, response);
+            } else {
+                throw new Exception(cmd);
+            }
+        } catch (Exception ex) {
+            request.setAttribute("errorMsg", "Kommando falsch: " + ex.getMessage());
+        } finally {
+            processRequest(request, response);
+        }
     }
 
     /**
@@ -77,5 +92,16 @@ public class WarenkorbDispatcher extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void doEntfernen(HttpServletRequest request, HttpServletResponse response, String substring) {
+        // Todo: model.deletePosition(p);
+    }
+
+    private void doHinzufuegen(HttpServletRequest request, HttpServletResponse response) {
+        // Todo: Fehlermeldung bei vorhandenem Artikel
+        String aName = request.getParameter("artikel");
+        int aID = model.getArtikelIndexByName(aName);
+        model.addPosition(new Position(0, aID, Integer.parseInt(request.getParameter("anzahl"))));
+    }
 
 }
